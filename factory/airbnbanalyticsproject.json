@@ -1,0 +1,9 @@
+{
+	"name": "airbnbanalyticsproject",
+	"location": "westus2",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "d66ed000-8862-4f12-84cd-cfb8f4ffa162",
+		"tenantId": "3f42459d-a57f-4a15-bebd-3af0b27db35a"
+	}
+}
