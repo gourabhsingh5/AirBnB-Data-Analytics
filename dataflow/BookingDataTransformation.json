@@ -26,8 +26,8 @@
 				"     changeFeedStartFromTheBeginning: false,",
 				"     format: 'document',",
 				"     systemColumns: false) ~> BookingData",
-				"BookingData split(ERROR_FUNCTION(''),",
-				"     disjoint: true) ~> DataQualityCheck@(BadRecords, )"
+				"BookingData split(check_out_date<check_in_date,",
+				"     disjoint: true) ~> DataQualityCheck@(BadRecords, AcceptedRecords)"
 			]
 		}
 	}
