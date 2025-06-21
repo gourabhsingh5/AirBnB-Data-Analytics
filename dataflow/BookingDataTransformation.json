@@ -10,6 +10,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "BookingDataCosmos"
+				},
+				{
+					"dataset": {
+						"referenceName": "BookingFactDataSynapse",
+						"type": "DatasetReference"
+					},
+					"name": "SynapseForLookup"
 				}
 			],
 			"sinks": [],
@@ -19,6 +26,9 @@
 				},
 				{
 					"name": "DeriveColumns"
+				},
+				{
+					"name": "LookupInSynapse"
 				}
 			],
 			"scriptLines": [
@@ -40,6 +50,11 @@
 				"     enableChangeFeed: true,",
 				"     changeFeedStartFromTheBeginning: false,",
 				"     format: 'document') ~> BookingDataCosmos",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table',",
+				"     staged: true) ~> SynapseForLookup",
 				"BookingDataCosmos split(check_out_date<check_in_date,",
 				"     disjoint: true) ~> DataQualitycheck@(BadRecords, AcceptedRecords)",
 				"DataQualitycheck@AcceptedRecords derive(booking_id = booking_id,",
@@ -57,7 +72,12 @@
 				"          stay_duration = (toTimestamp(check_out_date, 'yyyy-MM-dd') - toTimestamp(check_in_date, 'yyyy-MM-dd')) / 86400000,",
 				"          booking_year = year(toTimestamp(booking_date)),",
 				"          booking_month = month(toTimestamp(booking_date)),",
-				"          timestamp = timestamp) ~> DeriveColumns"
+				"          timestamp = timestamp) ~> DeriveColumns",
+				"DeriveColumns, SynapseForLookup lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     multiple: false,",
+				"     pickup: 'first',",
+				"     asc(ERROR_FUNCTION(''), true),",
+				"     broadcast: 'auto')~> LookupInSynapse"
 			]
 		}
 	}
